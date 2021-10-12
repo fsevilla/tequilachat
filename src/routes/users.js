@@ -1,26 +1,32 @@
 const { Db } = require('mongodb');
-
+const UsersController = require('../controllers/users.controller');
 const router = require('express').Router();
-const Database = require('./../models/database');
+const multer = require('multer');
+const path = require('path');
 
-
-router.get('/', (req, res) => {
-    // res.send('users endpoint!');
-    const database = new Database('users');
-
-    database.findOne({email: 'john.doe@gmail.com'})
-        .then(results => {
-            if(results) {
-                console.log('Resultados: ', results);
-                res.send(results);
-
-            } else {
-                console.log('No se encontro el usuario');
-            }
-        })
-        .catch(err => {});
+const storage = multer.diskStorage({
+    destination: function(req, file, cb) {
+        cb(null, path.join(__dirname, '..', '..', 'uploads'));
+    },
+    filename: function(req, file, cb) {
+        cb(null, file.originalname);
+    }
 });
 
+const fileFilter = function(req, file, cb) {
+    console.log('File filter: ', file.mimetype);
+    let isValid = false;
+    if(file.mimetype === 'image/jpeg') {
+        isValid = true;
+    }
+    cb(null, isValid);
+}
+
+const upload = multer({storage: storage, fileFilter: fileFilter});
+
+router.get('/', UsersController.getAllUsers);
+router.get('/profile', UsersController.profile)
+router.post('/profile', upload.single('image'), UsersController.createProfile)
 
 
 module.exports = router;

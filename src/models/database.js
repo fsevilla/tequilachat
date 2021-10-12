@@ -14,6 +14,10 @@ class Database {
         this.collection = database.collection(collectionName);
     }
 
+    find(filters) {
+        return this.collection.find();
+    }
+
     findOne(filters) {
         return this.collection.findOne(filters);
     }
